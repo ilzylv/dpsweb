@@ -1,0 +1,76 @@
+/* Definindo a fonte da logo da Tau */
+@font-face {
+    font-family: 'Azonix';
+    src: url('fontes/azonix-bold-tau.woff2') format('woff2'),
+         url('fontes/azonix-bold-tau.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Azonix';
+    src: url('fontes/azonix-tau.woff2') format('woff2'),
+         url('fontes/azonix-tau.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Corpo principal */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #DBEFE4;
+    color: #0E2936;
+    margin: 0;
+    padding: 0;
+}
+
+/* Capa */
+header {
+    background-color: #0E2936;
+    color: #DBEFE4;
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    font-family: 'Azonix', 'Roboto', Arial, sans-serif;
+    margin: 0;
+    font-size: 2em;
+}
+
+nav {
+    margin-top: 10px;
+}
+
+nav a {
+    font-family:'Azonix', 'Roboto', Arial, sans-serif;
+    color: #DBEFE4;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #78908C;
+}
+
+/* Conteúdo principal */
+.container {
+    padding: 40px 20px; 
+    max-width: 1200px; 
+    margin: 0 auto; 
+}
+
+/* Rodapé */
+footer {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #7C8488;
+    color: #DBEFE4;
+    text-align: center;
+    padding: 15px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-sizing: border-box; 
+}
