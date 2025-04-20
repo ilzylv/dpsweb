@@ -1,158 +1,749 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Combustion Chamber Calculator</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculos estruturais - Tau Rocket Team</title>
+    <link rel="stylesheet" href="../CSS/estilizacao.css">
+</head>
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title> Combustion Chamber Calculator</title>
-        <link rel="stylesheet" href="../CSS/estilizacao.css">
-    </head>
-    
+<script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 <body>
-    <div class="calculator-container">
-        <h2 class="mb-4">Combustion Chamber Calculator</h2>
+    <header>
+        <h1>Cálculos estruturais</h1>
+        <nav>
+            <a href="../index.html#home">Home</a>
+            <a href="../index.html#sobre">Sobre</a>
+            <a href="../index.html#projetos">Projetos</a>
+            <a href="../index.html#recursos">Recursos</a>
+            <a href="../index.html#teoria">Teoria e boas práticas</a>
+            <a href="../index.html#contato">Contato</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <section>
+            <h2>Dimensionamento estrutural do motor</h2>
+            <p>Em motores experimentais de foguetes, os componentes conhecidos como <i>bulkheads</i> e <i>cases</i> desempenham papéis fundamentais para garantir a segurança e a eficiência do motor. O <i>bulkhead</i> atua como uma tampa selada em uma das extremidades do motor, responsável por conter os gases de alta pressão e temperatura gerados durante a combustão. Seu dimensionamento é crítico: uma espessura inadequada pode levar à deformação plástica, vazamentos ou até falhas catastróficas. Já o <i>case</i>, geralmente um tubo cilíndrico comercial, serve como invólucro para o propelente sólido ou como câmara de pressão em sistemas híbridos. A validação desse componente é essencial, pois muitos tubos disponíveis no mercado são padronizados e nem sempre atendem às exigências de pressão e temperatura de um motor experimental.
+                Para unir o <i>bulkhead</i> ao <i>case</i>, parafusos dispostos radialmente são frequentemente utilizados em projetos experimentais. Essa disposição, com os parafusos posicionados perpendicularmente ao eixo do motor, facilita a montagem e desmontagem, crucial para ajustes em protótipos. </p>
+            
         
-        <!-- Input Section -->
-        <div class="input-section">
-            <div class="row">
-                <!-- (Keep previous input groups) -->
-                
-                <div class="col-md-6">
-                    <h4>Bulkhead Parameters</h4>
-                    <div class="input-group">
-                        <label>Fator de segurança</label>
-                        <input type="number" id="fs_b" class="form-control" value="2" step="0.1">
-                    </div>
-                    <div class="input-group">
-                        <label>Tensão de escoamento do bulkhead (MPa)</label>
-                        <input type="number" id="te_b" class="form-control" value="205" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>Espessura radial do bulkhead (mm)</label>
-                        <input type="number" id="er_b" class="form-control" value="7" step="0.1">
-                    </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <h4>Bolt Parameters</h4>
-                    <div class="input-group">
-                        <label>Diâmetro do parafuso (mm)</label>
-                        <input type="number" id="d_p" class="form-control" value="9.03" step="0.01">
-                    </div>
-                    <div class="input-group">
-                        <label>Diâmetro do furo (mm)</label>
-                        <input type="number" id="df_p" class="form-control" value="10" step="0.1">
-                    </div>
-                    <div class="input-group">
-                        <label>Tensão de tração do parafuso (MPa)</label>
-                        <input type="number" id="Tt_p" class="form-control" value="207" step="1">
-                    </div>
-                    <div class="input-group">
-                        <label>Fator de segurança</label>
-                        <input type="number" id="Fs" class="form-control" value="2" step="0.1">
-                    </div>
-                    <div class="input-group">
-                        <label>Distância furo-borda (multiplicador)</label>
-                        <input type="number" id="D_bfc" class="form-control" value="1.5" step="0.1">
-                    </div>
-                </div>
+            <div class="tabs">
+                <div class="tab active" data-tab="main-calc">Cálculos Estruturais</div>
+                <div class="tab" data-tab="formulas">Fórmulas</div>
+                <div class="tab" data-tab="materials">Materiais</div>
             </div>
+        </section>
+
+        <div id="main-calc" class="tab-content">
+            <section>
+                <h2>τ-RocketSafe</h2>
+                <p>Esta ferramenta permite realizar os cálculos necessários para o dimensionamento estrutural de um motor de foguete, incluindo análise de tensões, seleção de parafusos, espessura do <i>bulkhead</i> e validação do fator de segurança dos componentes.</p>
+                
+                <div id="unitToggle">
+                    <span>Métrico</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="unitSystem">
+                        <span class="slider"></span>
+                    </label>
+                    <span>Imperial</span>
+                </div>
+                
+                <div class="notification success" id="successNotification">
+                    Cálculos realizados com sucesso!
+                </div>
+                
+                <div class="notification error" id="errorNotification">
+                    Erro nos cálculos. Verifique os valores inseridos.
+                </div>
+                
+                <div class="grid-container">
+                    <div>
+                        <h3>Dados de Entrada</h3>
+                        <form id="calculationForm">
+                            <div class="form-group">
+                                <label for="e">Espessura (Case)<span class="unit">[mm]</span>:</label>
+                                <input type="number" id="e" value="3.175" step="0.001" min="0.1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dext_c">Diâmetro externo (Case) <span class="unit">[mm]</span>:</label>
+                                <input type="number" id="dext_c" value="76.2" step="0.1" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="pmax">Pressão máxima na câmara <span class="unit">[MPa]</span>:</label>
+                                <input type="number" id="pmax" value="7" step="0.1" min="0.1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="te_c">Tensão de escoamento (Case) <span class="unit">[MPa]</span>:
+                                    <div class="tooltip">ⓘ
+                                        <span class="tooltiptext">Limite de tensão antes que o material sofra deformação plástica.</span>
+                                    </div>
+                                </label>
+                                <input type="number" id="te_c" value="150" step="0.1" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fs_c">Fator de segurança esperado:</label>
+                                <input type="number" id="fs_c" value="2" step="0.1" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="te_b">Tensão de escoamento mínima (Bulkhead) <span class="unit">[MPa]</span>:</label>
+                                <input type="number" id="te_b" value="205" step="0.1" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="er_b">Espessura radial <span class="unit">[mm]</span>:</label>
+                                <input type="number" id="er_b" value="7" step="0.1" min="0.1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="d_p">Diâmetro do parafuso <span class="unit">[mm]</span>:</label>
+                                <input type="number" id="d_p" value="9.03" step="0.01" min="0.1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="df_p">Diâmetro do furo do parafuso <span class="unit">[mm]</span>:</label>
+                                <input type="number" id="df_p" value="10" step="0.1" min="0.1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="tt_p">Tensão de escoamento por cisalhamento (Parafuso) <span class="unit">[MPa]</span>:</label>
+                                <input type="number" id="tt_p" value="207" step="0.1" min="1" required>
+                            </div>
+                            <button type="button" id="calculateButton">
+                                Calcular
+                                <span class="loading" id="loadingIndicator">⟳</span>
+                            </button>
+                            <button type="button" id="exportButton" style="background-color: #78908C; margin-left: 10px;">
+                                Exportar Resultados
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div id="results" class="results">
+                        <h3>Resultados dos Cálculos</h3>
+                        <div class="result-section">
+                            <h4>Dimensões Iniciais</h4>
+                            <div class="result-item">
+                                <span>Diâmetro interno:</span>
+                                <span id="dint_c">69.85 mm</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Espessura:</span>
+                                <span id="E">3.18 mm</span>
+                            </div>
+                        </div>
+                        
+                        <div class="result-section">
+                            <h4>Tensões Calculadas</h4>
+                            <div class="result-item">
+                                <span>Tensão tangencial:</span>
+                                <span id="Tt">88.05 MPa</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Tensão radial:</span>
+                                <span id="Tr">-7.00 MPa</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Tensão longitudinal:</span>
+                                <span id="Tl">40.53 MPa</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Tensão de Von Mises:</span>
+                                <span id="Tvm">82.73 MPa</span>
+                            </div>
+                        </div>
+                        
+                        <div class="result-section">
+                            <h4>Fator de Segurança</h4>
+                            <div class="result-item">
+                                <span>Fator de segurança calculado:</span>
+                                <span id="Fs_c">1.81</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Status:</span>
+                                <span id="safety_status" style="font-weight: bold; color: #f39c12;">Aceitável</span>
+                            </div>
+                        </div>
+                        
+                        <div class="result-section">
+                            <h4>Bulkhead</h4>
+                            <div class="result-item">
+                                <span>Espessura do bulkhead:</span>
+                                <span id="E_b">3.76 mm</span>
+                            </div>
+                        </div>
+                        
+                        <div class="result-section">
+                            <h4>Parafusos</h4>
+                            <div class="result-item">
+                                <span>Área transversal interna:</span>
+                                <span id="A">3,830 mm²</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Força nos parafusos:</span>
+                                <span id="F_p">26,801.59 N</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Tensão na seção transversal:</span>
+                                <span id="T">417.33 MPa</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Número de parafusos calculado:</span>
+                                <span id="N_p">6.98 unidades</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Número de parafusos necessários:</span>
+                                <span id="N_p_ceil">7 unidades</span>
+                            </div>
+                        </div>
+
+                        <div class="visualization" id="rocketVisualization">
+                            <svg id="rocketSvg" width="100%" height="100%" viewBox="0 0 300 200" style="max-width: 100%; max-height: 100%;">
+                                <!-- Rocket visualization will be added here via JavaScript -->
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
-        <button class="btn btn-primary mt-3" onclick="calculate()">Calculate</button>
+        <div id="formulas" class="tab-content" style="display: none;">
+        <section>
+            <h2>Fórmulas Utilizadas nos Cálculos</h2>
+            
+            <h3>Tensões em Cilindros de Parede Espessa</h3>
+            <p>As tensões em um cilindro de parede espessa sob pressão interna são calculadas usando as equações de Lamé:</p>
+            
+            <div class="formula">
+              <p>Tensão Tangencial ($\sigma_t$):</p>
+              $$\sigma_t = \frac{P \cdot r_i^2}{r_o^2 - r_i^2} \cdot \left(1 + \frac{r_o^2}{r^2}\right)$$
+              
+              <p>Tensão Radial ($\sigma_r$):</p>
+              $$\sigma_r = \frac{P \cdot r_i^2}{r_o^2 - r_i^2} \cdot \left(1 - \frac{r_i^2}{r^2}\right)$$
+              
+              <p>Tensão Longitudinal ($\sigma_l$):</p>
+              $$\sigma_l = \frac{2P \cdot r_i^2}{r_o^2 - r_i^2}$$
+            </div>
+            
+            <p>Onde:</p>
+            <ul>
+              <li>$P$ = pressão interna</li>
+              <li>$r_i$ = raio interno</li>
+              <li>$r_o$ = raio externo</li>
+              <li>$r$ = raio do ponto de interesse (geralmente $r_i$ para tensão máxima)</li>
+            </ul>
+            
+            <h3>Critério de Von Mises</h3>
+            <p>O critério de falha de Von Mises é utilizado para prever o escoamento do material:</p>
+            
+            <div class="formula">
+              $$\sigma_{\text{vm}} = \sqrt{\frac{(\sigma_l - \sigma_r)^2 + (\sigma_r - \sigma_t)^2 + (\sigma_t - \sigma_l)^2}{2}}$$
+            </div>
+            
+            <h3>Dimensionamento de Bulkhead</h3>
+            <p>A espessura do bulkhead é calculada utilizando:</p>
+            
+            <div class="formula">
+              $$t = d \cdot \sqrt{\frac{N \cdot P \cdot \text{FS}}{\sigma_y}}$$
+            </div>
+            
+            <p>Onde:</p>
+            <ul>
+              <li>$t$ = espessura do bulkhead</li>
+              <li>$d$ = diâmetro</li>
+              <li>$N$ = fator de forma</li>
+              <li>$\text{FS}$ = fator de segurança</li>
+              <li>$\sigma_y$ = tensão de escoamento do material</li>
+            </ul>
+            
+            <h3>Dimensionamento de Parafusos</h3>
+            <p>O número de parafusos necessários é calculado com base na força total e na resistência ao cisalhamento:</p>
+            
+            <div class="formula">
+              <p>Força total ($F$):</p>
+              $$F = P \cdot A$$
+              
+              <p>Tensão na seção transversal ($T$):</p>
+              $$T = \frac{4F}{\pi d^2}$$
+              
+              <p>Número de parafusos ($N$):</p>
+              $$N = \frac{T \cdot \text{FS}}{\tau_{\text{allow}}}$$
+            </div>
+          </section>
+        </div>
 
-        <!-- Results Section -->
-        <div class="result-section" id="results" style="display: none;">
-            <h4>Calculation Results</h4>
-            <!-- (Keep previous result items) -->
-            <div class="result-item">Distância furo-borda: <span id="D_fb"></span> mm</div>
+        <div id="materials" class="tab-content" style="display: none;">
+            <section>
+                <h2>Tabela de Materiais</h2>
+                <p>Esta tabela fornece propriedades mecânicas de materiais comumente utilizados em motores de foguete.</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th>Tensão de Escoamento (MPa)</th>
+                            <th>Tensão de Ruptura (MPa)</th>
+                            <th>Densidade (g/cm³)</th>
+                            <th>Temp. Máxima (°C)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Alumínio 6061-T6</td>
+                            <td>240</td>
+                            <td>310</td>
+                            <td>2.70</td>
+                            <td>300</td>
+                        </tr>
+                        <tr>
+                            <td>Aço 1020</td>
+                            <td>205</td>
+                            <td>380</td>
+                            <td>7.85</td>
+                            <td>500</td>
+                        </tr>
+                        <tr>
+                            <td>Aço Inoxidável 304</td>
+                            <td>215</td>
+                            <td>505</td>
+                            <td>8.00</td>
+                            <td>870</td>
+                        </tr>
+                        <tr>
+                            <td>Inconel 718</td>
+                            <td>1035</td>
+                            <td>1240</td>
+                            <td>8.19</td>
+                            <td>980</td>
+                        </tr>
+                        <tr>
+                            <td>Titânio Ti-6Al-4V</td>
+                            <td>880</td>
+                            <td>950</td>
+                            <td>4.43</td>
+                            <td>600</td>
+                        </tr>
+                        <tr>
+                            <td>Compósito de Fibra de Carbono</td>
+                            <td>600-3000*</td>
+                            <td>700-4000*</td>
+                            <td>1.60</td>
+                            <td>400</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="font-size: 0.9rem; margin-top: 10px;">* Varia dependendo da orientação das fibras e da resina utilizada.</p>
+                
+                <h3 style="margin-top: 30px;">Recomendações para Seleção de Material</h3>
+                <ul style="list-style-type: disc; padding-left: 20px;">
+                    <li><strong>Câmara de combustão:</strong> Para baixas temperaturas, alumínio 6061-T6 pode ser adequado. Para temperaturas mais elevadas, aço inoxidável 304 ou Inconel 718.</li>
+                    <li><strong>Bocal:</strong> Materiais com alta resistência térmica como Inconel 718 ou grafite são recomendados.</li>
+                    <li><strong>Bulkhead:</strong> Aço 1020 ou alumínio 6061-T6 são comumente utilizados.</li>
+                    <li><strong>Parafusos:</strong> Parafusos de aço de alta resistência, como o aço 8.8 ou 10.9, são recomendados.</li>
+                </ul>
+            </section>
         </div>
     </div>
 
+    <footer>
+        <p>&copy; 2025. Tau Rocket Team.</p>
+    </footer>
+    
     <script>
-        function calculate() {
-            // Get all input values
-            const inputs = {
-                e: parseFloat(document.getElementById('e').value),
-                dext_c: parseFloat(document.getElementById('dext_c').value),
-                pmax: parseFloat(document.getElementById('pmax').value),
-                te_c: parseFloat(document.getElementById('te_c').value),
-                fs_b: parseFloat(document.getElementById('fs_b').value),
-                d_p: parseFloat(document.getElementById('d_p').value),
-                te_b: parseFloat(document.getElementById('te_b').value),
-                er_b: parseFloat(document.getElementById('er_b').value),
-                df_p: parseFloat(document.getElementById('df_p').value),
-                Tt_p: parseFloat(document.getElementById('Tt_p').value),
-                Fs: parseFloat(document.getElementById('Fs').value),
-                D_bfc: parseFloat(document.getElementById('D_bfc').value)
-            };
 
-            // Unit conversions
-            const conversions = {
-                dint_c: inputs.dext_c - (2 * inputs.e),
-                Dext_c: inputs.dext_c / 1000,
-                Dint_c: (inputs.dext_c - (2 * inputs.e)) / 1000,
-                Pmax: inputs.pmax * 10**6,
-                Te_c: inputs.te_c * 10**6,
-                Te_b: inputs.te_b * 10**6,
-                Er_b: inputs.er_b / 1000,
-                D_p: inputs.d_p / 1000,
-                Df_p: inputs.df_p / 1000,
-                Tt_p: inputs.Tt_p * 10**6
-            };
-
-            // Geometric calculations
-            const geometry = {
-                Rext: conversions.Dext_c / 2,
-                Rint: conversions.Dint_c / 2,
-                E: conversions.Dext_c/2 - conversions.Dint_c/2,
-                Dext_b: 0.98 * conversions.Dint_c,
-                Dint_b: 0.98 * conversions.Dint_c - 2 * conversions.Er_b
-            };
-
-            // Stress calculations
-            const stresses = {
-                Tt: (conversions.Pmax * geometry.Rint**2 / (geometry.Rext**2 - geometry.Rint**2)) * (1 + (geometry.Rext**2 / geometry.Rint**2)),
-                Tr: (conversions.Pmax * geometry.Rint**2 / (geometry.Rext**2 - geometry.Rint**2)) * (1 - (geometry.Rint**2 / geometry.Rext**2)),
-                Tl: (2 * conversions.Pmax * geometry.Rint**2) / (geometry.Rext**2 - geometry.Rint**2),
-                Tvm: Math.sqrt(((stresses.Tl - stresses.Tr)**2 + (stresses.Tr - stresses.Tt)**2 + (stresses.Tt - stresses.Tl)**2) / 2)
-            };
-
-            // Safety calculations
-            const safety = {
-                Fs_c: conversions.Te_c / stresses.Tvm,
-                N: 0.33 * ((conversions.Pmax * geometry.Dext_b / (2 * conversions.Te_c)) / geometry.E),
-                E_b: geometry.Dint_b * Math.sqrt((safety.N * conversions.Pmax * inputs.fs_b) / conversions.Te_b)
-            };
-
-            // Bolt calculations
-            const bolts = {
-                A: Math.PI * geometry.Rint**2,
-                F_p: conversions.Pmax * Math.PI * geometry.Rint**2,
-                T: (4 * bolts.F_p) / (Math.PI * conversions.D_p**2),
-                Tc_p: conversions.Tt_p / Math.sqrt(3),
-                N_p: Math.ceil((bolts.T * inputs.Fs) / bolts.Tc_p),
-                D_fb: conversions.Df_p * 1000 * inputs.D_bfc
-            };
-
-            // Display results
-            document.getElementById('results').style.display = 'block';
-            document.getElementById('dint_c').textContent = conversions.dint_c.toFixed(2);
-            document.getElementById('E').textContent = geometry.E.toFixed(5);
-            document.getElementById('Tt').textContent = stresses.Tt.toFixed(2);
-            document.getElementById('Tr').textContent = stresses.Tr.toFixed(2);
-            document.getElementById('Tl').textContent = stresses.Tl.toFixed(2);
-            document.getElementById('Tvm').textContent = stresses.Tvm.toFixed(2);
-            document.getElementById('Fs_c').textContent = safety.Fs_c.toFixed(2);
-            document.getElementById('E_b').textContent = safety.E_b.toFixed(5);
-            document.getElementById('F_p').textContent = bolts.F_p.toFixed(2);
-            document.getElementById('N_p').textContent = bolts.N_p;
-            document.getElementById('D_fb').textContent = bolts.D_fb.toFixed(2);
+    // Tab switching functionality (existing code)
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            // Show the selected tab content and mark tab as active
+            const tabId = tab.getAttribute('data-tab');
+            document.getElementById(tabId).style.display = 'block';
+            tab.classList.add('active');
+        });
+    });
+    
+    // Unit toggle functionality (existing code)
+    document.getElementById('unitSystem').addEventListener('change', function() {
+        const isImperial = this.checked;
+        const unitLabels = document.querySelectorAll('.unit');
+        
+        unitLabels.forEach(label => {
+            if (label.textContent.includes('[mm]')) {
+                label.textContent = isImperial ? label.textContent.replace('[mm]', '[in]') : label.textContent;
+            } else if (label.textContent.includes('[in]')) {
+                label.textContent = !isImperial ? label.textContent.replace('[in]', '[mm]') : label.textContent;
+            } else if (label.textContent.includes('[MPa]')) {
+                label.textContent = isImperial ? label.textContent.replace('[MPa]', '[psi]') : label.textContent;
+            } else if (label.textContent.includes('[psi]')) {
+                label.textContent = !isImperial ? label.textContent.replace('[psi]', '[MPa]') : label.textContent;
+            }
+        });
+        
+        // Convert input values
+        if (isImperial) {
+            // Convert mm to inches (divide by 25.4)
+            document.getElementById('e').value = (parseFloat(document.getElementById('e').value) / 25.4).toFixed(3);
+            document.getElementById('dext_c').value = (parseFloat(document.getElementById('dext_c').value) / 25.4).toFixed(3);
+            document.getElementById('er_b').value = (parseFloat(document.getElementById('er_b').value) / 25.4).toFixed(3);
+            document.getElementById('d_p').value = (parseFloat(document.getElementById('d_p').value) / 25.4).toFixed(3);
+            document.getElementById('df_p').value = (parseFloat(document.getElementById('df_p').value) / 25.4).toFixed(3);
+            
+            // Convert MPa to psi (1 MPa = 145.038 psi)
+            document.getElementById('pmax').value = (parseFloat(document.getElementById('pmax').value) * 145.038).toFixed(0);
+            document.getElementById('te_c').value = (parseFloat(document.getElementById('te_c').value) * 145.038).toFixed(0);
+            document.getElementById('te_b').value = (parseFloat(document.getElementById('te_b').value) * 145.038).toFixed(0);
+            document.getElementById('tt_p').value = (parseFloat(document.getElementById('tt_p').value) * 145.038).toFixed(0);
+        } else {
+            // Convert inches to mm (multiply by 25.4)
+            document.getElementById('e').value = (parseFloat(document.getElementById('e').value) * 25.4).toFixed(3);
+            document.getElementById('dext_c').value = (parseFloat(document.getElementById('dext_c').value) * 25.4).toFixed(3);
+            document.getElementById('er_b').value = (parseFloat(document.getElementById('er_b').value) * 25.4).toFixed(3);
+            document.getElementById('d_p').value = (parseFloat(document.getElementById('d_p').value) * 25.4).toFixed(3);
+            document.getElementById('df_p').value = (parseFloat(document.getElementById('df_p').value) * 25.4).toFixed(3);
+            
+            // Convert psi to MPa (1 psi = 0.00689476 MPa)
+            document.getElementById('pmax').value = (parseFloat(document.getElementById('pmax').value) * 0.00689476).toFixed(2);
+            document.getElementById('te_c').value = (parseFloat(document.getElementById('te_c').value) * 0.00689476).toFixed(2);
+            document.getElementById('te_b').value = (parseFloat(document.getElementById('te_b').value) * 0.00689476).toFixed(2);
+            document.getElementById('tt_p').value = (parseFloat(document.getElementById('tt_p').value) * 0.00689476).toFixed(2);
         }
-    </script>
+        
+        // If we already have results, recalculate with the new units
+        if (document.getElementById('Tvm').textContent !== '') {
+            calculate();
+        }
+    });
+    
+    // Calculate button functionality
+    document.getElementById('calculateButton').addEventListener('click', calculate);
+    
+    function calculate() {
+        // Show loading indicator
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        loadingIndicator.style.display = 'inline-block';
+        
+        // Hide notifications
+        document.getElementById('successNotification').style.display = 'none';
+        document.getElementById('errorNotification').style.display = 'none';
+        
+        // Get values from form
+        const e = parseFloat(document.getElementById('e').value);
+        const dext_c = parseFloat(document.getElementById('dext_c').value);
+        const pmax = parseFloat(document.getElementById('pmax').value);
+        const te_c = parseFloat(document.getElementById('te_c').value);
+        const fs_c = parseFloat(document.getElementById('fs_c').value);
+        const te_b = parseFloat(document.getElementById('te_b').value);
+        const er_b = parseFloat(document.getElementById('er_b').value);
+        const d_p = parseFloat(document.getElementById('d_p').value);
+        const df_p = parseFloat(document.getElementById('df_p').value);
+        const tt_p = parseFloat(document.getElementById('tt_p').value);
+        
+        // Check if units are imperial
+        const isImperial = document.getElementById('unitSystem').checked;
+        
+        // Convert to metric for calculations if necessary
+        let e_calc = e;
+        let dext_c_calc = dext_c;
+        let pmax_calc = pmax;
+        let te_c_calc = te_c;
+        let te_b_calc = te_b;
+        let er_b_calc = er_b;
+        let d_p_calc = d_p;
+        let df_p_calc = df_p;
+        let tt_p_calc = tt_p;
+        
+        if (isImperial) {
+            // Convert inches to mm
+            e_calc = e * 25.4;
+            dext_c_calc = dext_c * 25.4;
+            er_b_calc = er_b * 25.4;
+            d_p_calc = d_p * 25.4;
+            df_p_calc = df_p * 25.4;
+            
+            // Convert psi to MPa
+            pmax_calc = pmax * 0.00689476;
+            te_c_calc = te_c * 0.00689476;
+            te_b_calc = te_b * 0.00689476;
+            tt_p_calc = tt_p * 0.00689476;
+        }
+        
+        try {
+            // Perform calculations
+            // 1. Dimensões básicas
+            const dint_c = dext_c_calc - 2 * e_calc;
+            const ri = dint_c / 2;
+            const ro = dext_c_calc / 2;
+            
+            // 2. Cálculo de esforços 
+            const Tt = (pmax_calc * ri * ri) / (((ro * ro) - (ri * ri)) * ((1 + (ro * ro)) / ((ri * ri))));
+            const Tr = (pmax_calc * ri* ri)/((ro * ro)-(ri * ri) * (1 - ((ri * ri)/(ro * ro)))); 
+            const Tl = (2 * pmax_calc * ri * ri) / (ro * ro - ri * ri);
+            
+            // 3. Tensão de Von Mises 
+            const Tvm = Math.sqrt(((Tl - Tr) ** 2 + (Tr - Tt) ** 2 + (Tt - Tl) ** 2) / 2);
+            
+            // 4. Fator de segurança
+            const Fs_calc = te_c_calc / Tvm;
+            
+            // 5. Espessura do Bulkhead
+            const N = 0.3; // Shape factor for flat circular plate
+            const E_b = (dint_c / 2) * Math.sqrt((N * pmax_calc * fs_c) / te_b_calc);
+            
+            // 6. Quantidade de parafusos
+            const A = Math.PI * (dint_c / 2) ** 2; // Área da seção transversal
+            const F_p = pmax_calc * A; // Força nos parafusos
+            const T = (4 * F_p) / (Math.PI * d_p_calc ** 2); // Tensão na seção transversal
+            const N_p = (T * fs_c) / tt_p_calc; // Número de parafusos
+            const N_p_ceil = Math.ceil(N_p); // Arredonda pra cima
+            
+            // Formatando valores pra disposição
+            let unitSuffix, forceUnit;
+            let conversionFactor = 1;
+            let pressureConversionFactor = 1;
+            let areaConversionFactor = 1;
+            let forceConversionFactor = 1;
+            
+            if (isImperial) {
+                unitSuffix = ' in';
+                pressureSuffix = ' psi';
+                forceUnit = ' lbf';
+                conversionFactor = 1/25.4; // mm to in
+                pressureConversionFactor = 145.038; // MPa to psi
+                areaConversionFactor = 1/645.16; // mm² to in²
+                forceConversionFactor = 0.2248; // N to lbf
+            } else {
+                unitSuffix = ' mm';
+                pressureSuffix = ' MPa';
+                forceUnit = ' N';
+            }
+            
+            document.getElementById('dint_c').textContent = (dint_c * conversionFactor).toFixed(2) + unitSuffix;
+            document.getElementById('E').textContent = (e_calc * conversionFactor).toFixed(2) + unitSuffix;
+            document.getElementById('Tt').textContent = (Tt * pressureConversionFactor).toFixed(2) + pressureSuffix;
+            document.getElementById('Tr').textContent = (Tr * pressureConversionFactor).toFixed(2) + pressureSuffix;
+            document.getElementById('Tl').textContent = (Tl * pressureConversionFactor).toFixed(2) + pressureSuffix;
+            document.getElementById('Tvm').textContent = (Tvm * pressureConversionFactor).toFixed(2) + pressureSuffix;
+            document.getElementById('Fs_c').textContent = Fs_calc.toFixed(2);
+            document.getElementById('E_b').textContent = (E_b * conversionFactor).toFixed(2) + unitSuffix;
+            document.getElementById('A').textContent = (A * areaConversionFactor).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (isImperial ? ' in²' : ' mm²');
+            document.getElementById('F_p').textContent = (F_p * forceConversionFactor).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + forceUnit;
+            document.getElementById('T').textContent = (T * pressureConversionFactor).toFixed(2) + pressureSuffix;
+            document.getElementById('N_p').textContent = N_p.toFixed(2) + ' unidades';
+            document.getElementById('N_p_ceil').textContent = N_p_ceil + ' unidades';
+            
+            // Cor do fator de segurança
+            const safetyStatus = document.getElementById('safety_status');
+            if (Fs_calc >= fs_c) {
+                safetyStatus.textContent = 'Seguro';
+                safetyStatus.style.color = '#27ae60';
+            } else if (Fs_calc >= 0.9 * fs_c) {
+                safetyStatus.textContent = 'Aceitável';
+                safetyStatus.style.color = '#f39c12';
+            } else {
+                safetyStatus.textContent = 'Inseguro';
+                safetyStatus.style.color = '#e74c3c';
+            }
+            
+            // Atualizando a visualização
+            updateVisualization(dint_c, dext_c_calc, e_calc, N_p_ceil);
+            
+            // Aparece mensagem de sucesso
+            document.getElementById('successNotification').style.display = 'block';
+        } catch (error) {
+            console.error('Calculation error:', error);
+            // Mensagem de erro
+            document.getElementById('errorNotification').style.display = 'block';
+        }
+        
+        // Escondendo o indicador de carregamento
+        loadingIndicator.style.display = 'none';
+    }
+    
+    // Atualizando a visualização
+    function updateVisualization(dint, dext, thickness, boltCount) {
+        const svg = document.getElementById('rocketSvg');
+        svg.innerHTML = '';
+        
+        const centerX = 150;
+        const centerY = 100;
+        const scale = 1.5;
+        
+        // Calculate scaled dimensions
+        const outerRadius = (dext / 2) * scale;
+        const innerRadius = (dint / 2) * scale;
+        
+        // Draw motor case (barrel)
+        const barrel = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        barrel.setAttribute('x', centerX - outerRadius);
+        barrel.setAttribute('y', centerY - 50);
+        barrel.setAttribute('width', outerRadius * 2);
+        barrel.setAttribute('height', 100);
+        barrel.setAttribute('fill', '#D0D0D0');
+        barrel.setAttribute('stroke', '#7C8488');
+        barrel.setAttribute('stroke-width', '1');
+        svg.appendChild(barrel);
+        
+        // Draw inner cavity
+        const cavity = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        cavity.setAttribute('x', centerX - innerRadius);
+        cavity.setAttribute('y', centerY - 50);
+        cavity.setAttribute('width', innerRadius * 2);
+        cavity.setAttribute('height', 100);
+        cavity.setAttribute('fill', '#DBEFE4');
+        svg.appendChild(cavity);
+        
+        // Draw end caps
+        const endCapLeft = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        endCapLeft.setAttribute('x', centerX - outerRadius - 10);
+        endCapLeft.setAttribute('y', centerY - 50);
+        endCapLeft.setAttribute('width', 10);
+        endCapLeft.setAttribute('height', 100);
+        endCapLeft.setAttribute('fill', '#0E2936');
+        svg.appendChild(endCapLeft);
+        
+        const endCapRight = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        endCapRight.setAttribute('x', centerX + outerRadius);
+        endCapRight.setAttribute('y', centerY - 50);
+        endCapRight.setAttribute('width', 10);
+        endCapRight.setAttribute('height', 100);
+        endCapRight.setAttribute('fill', '#0E2936');
+        svg.appendChild(endCapRight);
+        
+        // Draw bolts
+        const boltRadius = 3;
+        const boltOffset = 5;
+        
+        // Draw bolts on left cap
+        for (let i = 0; i < boltCount; i++) {
+            const angle = (i / boltCount) * 2 * Math.PI;
+            const boltX = centerX - outerRadius - boltOffset;
+            const boltY = centerY - 40 + (i * 80 / (boltCount - 1));
+            
+            const bolt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            bolt.setAttribute('cx', boltX);
+            bolt.setAttribute('cy', boltY);
+            bolt.setAttribute('r', boltRadius);
+            bolt.setAttribute('fill', '#78908C');
+            svg.appendChild(bolt);
+        }
+        
+        // Draw bolts on right cap
+        for (let i = 0; i < boltCount; i++) {
+            const angle = (i / boltCount) * 2 * Math.PI;
+            const boltX = centerX + outerRadius + boltOffset;
+            const boltY = centerY - 40 + (i * 80 / (boltCount - 1));
+            
+            const bolt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            bolt.setAttribute('cx', boltX);
+            bolt.setAttribute('cy', boltY);
+            bolt.setAttribute('r', boltRadius);
+            bolt.setAttribute('fill', '#78908C');
+            svg.appendChild(bolt);
+        }
+        
+        // Add labels
+        const wallLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        wallLabel.setAttribute('x', centerX);
+        wallLabel.setAttribute('y', centerY + 70);
+        wallLabel.setAttribute('text-anchor', 'middle');
+        wallLabel.setAttribute('fill', '#0E2936');
+        wallLabel.setAttribute('font-size', '10');
+        wallLabel.textContent = 'Espessura: ' + thickness.toFixed(2) + ' mm';
+        svg.appendChild(wallLabel);
+        
+        const diameterLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        diameterLabel.setAttribute('x', centerX);
+        diameterLabel.setAttribute('y', centerY - 60);
+        diameterLabel.setAttribute('text-anchor', 'middle');
+        diameterLabel.setAttribute('fill', '#0E2936');
+        diameterLabel.setAttribute('font-size', '10');
+        diameterLabel.textContent = 'Diâmetro ext.: ' + dext.toFixed(2) + ' mm';
+        svg.appendChild(diameterLabel);
+        
+        const boltLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        boltLabel.setAttribute('x', centerX);
+        boltLabel.setAttribute('y', centerY + 85);
+        boltLabel.setAttribute('text-anchor', 'middle');
+        boltLabel.setAttribute('fill', '#0E2936');
+        boltLabel.setAttribute('font-size', '10');
+        boltLabel.textContent = 'Parafusos: ' + boltCount + ' unidades';
+        svg.appendChild(boltLabel);
+    }
+    
+    // Export results functionality
+    document.getElementById('exportButton').addEventListener('click', function() {
+        // Get all result values
+        const results = {
+            diametroInterno: document.getElementById('dint_c').textContent,
+            espessura: document.getElementById('E').textContent,
+            tensaoTangencial: document.getElementById('Tt').textContent,
+            tensaoRadial: document.getElementById('Tr').textContent, 
+            tensaoLongitudinal: document.getElementById('Tl').textContent,
+            tensaoVonMises: document.getElementById('Tvm').textContent,
+            fatorSeguranca: document.getElementById('Fs_c').textContent,
+            statusSeguranca: document.getElementById('safety_status').textContent,
+            espessuraBulkhead: document.getElementById('E_b').textContent,
+            areaTransversal: document.getElementById('A').textContent,
+            forcaParafusos: document.getElementById('F_p').textContent,
+            tensaoSecaoTransversal: document.getElementById('T').textContent,
+            numParafusosCalc: document.getElementById('N_p').textContent,
+            numParafusosNecessarios: document.getElementById('N_p_ceil').textContent
+        };
+        
+        // Create data for CSV export
+        let csvContent = 'data:text/csv;charset=utf-8,';
+        
+        // Add headers
+        csvContent += 'Parâmetro,Valor\n';
+        
+        // Add rows
+        for (const [key, value] of Object.entries(results)) {
+            csvContent += `${key},${value}\n`;
+        }
+        
+        // Create download link
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'resultados_calculos_estruturais.csv');
+        document.body.appendChild(link);
+        
+        // Trigger download
+        link.click();
+        
+        // Show notification
+        document.getElementById('successNotification').style.display = 'block';
+        document.getElementById('successNotification').textContent = 'Resultados exportados com sucesso!';
+        
+        // Reset notification after 3 seconds
+        setTimeout(() => {
+            document.getElementById('successNotification').style.display = 'none';
+            document.getElementById('successNotification').textContent = 'Cálculos realizados com sucesso!';
+        }, 3000);
+    });
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set the first tab as active
+        document.querySelector('.tab[data-tab="main-calc"]').click();
+    });
+</script>
+
 </body>
 </html>
+
