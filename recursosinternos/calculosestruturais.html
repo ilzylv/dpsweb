@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Combustion Chamber Calculator</title>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> Combustion Chamber Calculator</title>
+        <link rel="stylesheet" href="../CSS/estilizacao.css">
+    </head>
+    
+<body>
+    <div class="calculator-container">
+        <h2 class="mb-4">Combustion Chamber Calculator</h2>
+        
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="row">
+                <!-- (Keep previous input groups) -->
+                
+                <div class="col-md-6">
+                    <h4>Bulkhead Parameters</h4>
+                    <div class="input-group">
+                        <label>Fator de segurança</label>
+                        <input type="number" id="fs_b" class="form-control" value="2" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Tensão de escoamento do bulkhead (MPa)</label>
+                        <input type="number" id="te_b" class="form-control" value="205" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Espessura radial do bulkhead (mm)</label>
+                        <input type="number" id="er_b" class="form-control" value="7" step="0.1">
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h4>Bolt Parameters</h4>
+                    <div class="input-group">
+                        <label>Diâmetro do parafuso (mm)</label>
+                        <input type="number" id="d_p" class="form-control" value="9.03" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label>Diâmetro do furo (mm)</label>
+                        <input type="number" id="df_p" class="form-control" value="10" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Tensão de tração do parafuso (MPa)</label>
+                        <input type="number" id="Tt_p" class="form-control" value="207" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Fator de segurança</label>
+                        <input type="number" id="Fs" class="form-control" value="2" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Distância furo-borda (multiplicador)</label>
+                        <input type="number" id="D_bfc" class="form-control" value="1.5" step="0.1">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary mt-3" onclick="calculate()">Calculate</button>
+
+        <!-- Results Section -->
+        <div class="result-section" id="results" style="display: none;">
+            <h4>Calculation Results</h4>
+            <!-- (Keep previous result items) -->
+            <div class="result-item">Distância furo-borda: <span id="D_fb"></span> mm</div>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            // Get all input values
+            const inputs = {
+                e: parseFloat(document.getElementById('e').value),
+                dext_c: parseFloat(document.getElementById('dext_c').value),
+                pmax: parseFloat(document.getElementById('pmax').value),
+                te_c: parseFloat(document.getElementById('te_c').value),
+                fs_b: parseFloat(document.getElementById('fs_b').value),
+                d_p: parseFloat(document.getElementById('d_p').value),
+                te_b: parseFloat(document.getElementById('te_b').value),
+                er_b: parseFloat(document.getElementById('er_b').value),
+                df_p: parseFloat(document.getElementById('df_p').value),
+                Tt_p: parseFloat(document.getElementById('Tt_p').value),
+                Fs: parseFloat(document.getElementById('Fs').value),
+                D_bfc: parseFloat(document.getElementById('D_bfc').value)
+            };
+
+            // Unit conversions
+            const conversions = {
+                dint_c: inputs.dext_c - (2 * inputs.e),
+                Dext_c: inputs.dext_c / 1000,
+                Dint_c: (inputs.dext_c - (2 * inputs.e)) / 1000,
+                Pmax: inputs.pmax * 10**6,
+                Te_c: inputs.te_c * 10**6,
+                Te_b: inputs.te_b * 10**6,
+                Er_b: inputs.er_b / 1000,
+                D_p: inputs.d_p / 1000,
+                Df_p: inputs.df_p / 1000,
+                Tt_p: inputs.Tt_p * 10**6
+            };
+
+            // Geometric calculations
+            const geometry = {
+                Rext: conversions.Dext_c / 2,
+                Rint: conversions.Dint_c / 2,
+                E: conversions.Dext_c/2 - conversions.Dint_c/2,
+                Dext_b: 0.98 * conversions.Dint_c,
+                Dint_b: 0.98 * conversions.Dint_c - 2 * conversions.Er_b
+            };
+
+            // Stress calculations
+            const stresses = {
+                Tt: (conversions.Pmax * geometry.Rint**2 / (geometry.Rext**2 - geometry.Rint**2)) * (1 + (geometry.Rext**2 / geometry.Rint**2)),
+                Tr: (conversions.Pmax * geometry.Rint**2 / (geometry.Rext**2 - geometry.Rint**2)) * (1 - (geometry.Rint**2 / geometry.Rext**2)),
+                Tl: (2 * conversions.Pmax * geometry.Rint**2) / (geometry.Rext**2 - geometry.Rint**2),
+                Tvm: Math.sqrt(((stresses.Tl - stresses.Tr)**2 + (stresses.Tr - stresses.Tt)**2 + (stresses.Tt - stresses.Tl)**2) / 2)
+            };
+
+            // Safety calculations
+            const safety = {
+                Fs_c: conversions.Te_c / stresses.Tvm,
+                N: 0.33 * ((conversions.Pmax * geometry.Dext_b / (2 * conversions.Te_c)) / geometry.E),
+                E_b: geometry.Dint_b * Math.sqrt((safety.N * conversions.Pmax * inputs.fs_b) / conversions.Te_b)
+            };
+
+            // Bolt calculations
+            const bolts = {
+                A: Math.PI * geometry.Rint**2,
+                F_p: conversions.Pmax * Math.PI * geometry.Rint**2,
+                T: (4 * bolts.F_p) / (Math.PI * conversions.D_p**2),
+                Tc_p: conversions.Tt_p / Math.sqrt(3),
+                N_p: Math.ceil((bolts.T * inputs.Fs) / bolts.Tc_p),
+                D_fb: conversions.Df_p * 1000 * inputs.D_bfc
+            };
+
+            // Display results
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('dint_c').textContent = conversions.dint_c.toFixed(2);
+            document.getElementById('E').textContent = geometry.E.toFixed(5);
+            document.getElementById('Tt').textContent = stresses.Tt.toFixed(2);
+            document.getElementById('Tr').textContent = stresses.Tr.toFixed(2);
+            document.getElementById('Tl').textContent = stresses.Tl.toFixed(2);
+            document.getElementById('Tvm').textContent = stresses.Tvm.toFixed(2);
+            document.getElementById('Fs_c').textContent = safety.Fs_c.toFixed(2);
+            document.getElementById('E_b').textContent = safety.E_b.toFixed(5);
+            document.getElementById('F_p').textContent = bolts.F_p.toFixed(2);
+            document.getElementById('N_p').textContent = bolts.N_p;
+            document.getElementById('D_fb').textContent = bolts.D_fb.toFixed(2);
+        }
+    </script>
+</body>
+</html>
